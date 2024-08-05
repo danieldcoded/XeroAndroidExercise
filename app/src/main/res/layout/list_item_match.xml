@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.xero.interview.bankrecmatchmaker.CheckedListItem xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -7,62 +8,55 @@
     android:paddingLeft="@dimen/default_content_padding"
     android:paddingRight="@dimen/default_content_padding">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/list_item_height"
         android:layout_marginStart="@dimen/default_content_padding"
-        android:layout_marginLeft="@dimen/default_content_padding"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:layout_weight="1">
 
-        <LinearLayout
-            android:id="@+id/topCell"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/text_main"
+            style="@style/CellRegularText"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="bottom"
-            android:orientation="horizontal">
+            android:layout_marginBottom="4dp"
+            app:layout_constraintBottom_toTopOf="@+id/text_sub_left"
+            app:layout_constraintEnd_toStartOf="@+id/text_total"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:text="Invoice header" />
 
-            <TextView
-                android:id="@+id/text_main"
-                style="@style/CellRegularText"
-                android:layout_width="0dip"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                tools:text="Invoice header" />
-
-            <TextView
-                android:id="@+id/text_total"
-                style="@style/CellRegularText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="$999.99" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/text_total"
+            style="@style/CellRegularText"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="top"
-            android:orientation="horizontal">
+            app:layout_constraintBaseline_toBaselineOf="@+id/text_main"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="$999.99" />
 
-            <TextView
-                android:id="@+id/text_sub_left"
-                style="@style/CellSubText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="01 Jan" />
+        <TextView
+            android:id="@+id/text_sub_left"
+            style="@style/CellSubText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_main"
+            tools:text="01 Jan" />
 
-            <TextView
-                android:id="@+id/text_sub_right"
-                style="@style/CellSubText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="right"
-                tools:text="Sales invoice" />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/text_sub_right"
+            style="@style/CellSubText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            app:layout_constraintBaseline_toBaselineOf="@+id/text_sub_left"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/text_sub_left"
+            tools:text="Sales invoice" />
 
-    </LinearLayout>
-
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.xero.interview.bankrecmatchmaker.CheckedListItem>
