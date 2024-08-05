@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class FindMatchActivity extends AppCompatActivity {
 
@@ -64,7 +65,7 @@ public class FindMatchActivity extends AppCompatActivity {
     }
 
     private void updateRemainingTotal() {
-        matchText.setText(getString(R.string.select_matches, (int) remainingTotal));
+        matchText.setText(String.format(Locale.getDefault(), getString(R.string.select_matches), remainingTotal));
     }
 
     private List<MatchItem> buildMockData() {
