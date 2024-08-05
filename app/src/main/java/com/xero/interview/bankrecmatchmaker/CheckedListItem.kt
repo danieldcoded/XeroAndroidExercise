@@ -18,14 +18,19 @@ class CheckedListItem : LinearLayout, Checkable {
         init(context)
     }
 
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    ) {
         init(context)
     }
 
     private fun init(context: Context) {
         val layoutInflater = LayoutInflater.from(context)
         orientation = HORIZONTAL
-        checkBox = layoutInflater.inflate(R.layout.list_item_checkbox, this, false) as AppCompatCheckBox
+        checkBox =
+            layoutInflater.inflate(R.layout.list_item_checkbox, this, false) as AppCompatCheckBox
         addView(checkBox, 0)
         setOnClickListener { checkBox!!.toggle() }
     }

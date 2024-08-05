@@ -36,7 +36,7 @@ public class FindMatchActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         List<MatchItem> items = buildMockData();
         final MatchAdapter adapter = new MatchAdapter(items);
-        
+
         recyclerView.setAdapter(adapter);
     }
 
