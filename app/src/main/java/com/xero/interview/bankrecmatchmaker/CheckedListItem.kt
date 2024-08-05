@@ -7,43 +7,31 @@ import android.widget.Checkable
 import android.widget.LinearLayout
 import androidx.appcompat.widget.AppCompatCheckBox
 
-class CheckedListItem : LinearLayout, Checkable {
-    private var checkBox: AppCompatCheckBox? = null
+class CheckedListItem @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : LinearLayout(context, attrs, defStyleAttr), Checkable {
 
-    constructor(context: Context) : super(context) {
-        init(context)
-    }
+    private val checkBox: AppCompatCheckBox
 
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        init(context)
-    }
-
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context,
-        attrs,
-        defStyleAttr
-    ) {
-        init(context)
-    }
-
-    private fun init(context: Context) {
-        val layoutInflater = LayoutInflater.from(context)
+    init {
         orientation = HORIZONTAL
-        checkBox =
-            layoutInflater.inflate(R.layout.list_item_checkbox, this, false) as AppCompatCheckBox
-        addView(checkBox, 0)
-        setOnClickListener { checkBox!!.toggle() }
+
+        checkBox = (LayoutInflater.from(context)
+            .inflate(R.layout.list_item_checkbox, this, false) as AppCompatCheckBox)
+            .also { addView(it, 0) }
+
+        setOnClickListener { toggle() }
     }
 
     override fun setChecked(checked: Boolean) {
-        checkBox!!.isChecked = checked
+        checkBox.isChecked = checked
     }
 
-    override fun isChecked(): Boolean {
-        return checkBox!!.isChecked
-    }
+    override fun isChecked(): Boolean = checkBox.isChecked
 
     override fun toggle() {
-        checkBox!!.toggle()
+        checkBox.toggle()
     }
 }
