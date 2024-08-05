@@ -1,13 +1,12 @@
 package com.xero.interview.bankrecmatchmaker;
 
 import android.os.Bundle;
-import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+
+import com.xero.interview.bankrecmatchmaker.databinding.ActivityFindMatchBinding;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,15 +17,15 @@ public class FindMatchActivity extends AppCompatActivity {
     public static final String TARGET_MATCH_VALUE = "com.xero.interview.target_match_value";
     private static final float DEFAULT_TARGET_VALUE = 10000f;
 
-    private TextView matchText;
-    private RecyclerView recyclerView;
+    private ActivityFindMatchBinding binding;
     private MatchAdapter adapter;
     private float remainingTotal;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_find_match);
+        binding = ActivityFindMatchBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         setupToolbar();
         setupMatchText();
@@ -34,8 +33,7 @@ public class FindMatchActivity extends AppCompatActivity {
     }
 
     private void setupToolbar() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        setSupportActionBar(binding.toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -45,14 +43,12 @@ public class FindMatchActivity extends AppCompatActivity {
 
     private void setupMatchText() {
         remainingTotal = getIntent().getFloatExtra(TARGET_MATCH_VALUE, DEFAULT_TARGET_VALUE);
-        matchText = findViewById(R.id.match_text);
         updateRemainingTotal();
     }
 
     private void setupRecyclerView() {
-        recyclerView = findViewById(R.id.recycler_view);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerView.setHasFixedSize(true);
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new MatchAdapter(buildMockData(), (matchItem, isChecked) -> {
             if (isChecked) {
                 remainingTotal -= matchItem.total();
@@ -61,11 +57,11 @@ public class FindMatchActivity extends AppCompatActivity {
             }
             updateRemainingTotal();
         });
-        recyclerView.setAdapter(adapter);
+        binding.recyclerView.setAdapter(adapter);
     }
 
     private void updateRemainingTotal() {
-        matchText.setText(String.format(Locale.getDefault(), getString(R.string.select_matches), remainingTotal));
+        binding.matchText.setText(String.format(Locale.getDefault(), getString(R.string.select_matches), remainingTotal));
     }
 
     private List<MatchItem> buildMockData() {

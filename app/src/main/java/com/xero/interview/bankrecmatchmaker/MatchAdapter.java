@@ -1,17 +1,17 @@
 package com.xero.interview.bankrecmatchmaker;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.xero.interview.bankrecmatchmaker.databinding.ListItemMatchBinding;
+
 import java.util.List;
 import java.util.Locale;
 
-public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.ViewHolder> {
+public class MatchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final List<MatchItem> matchItems;
     private final OnItemCheckedListener onItemCheckedListener;
@@ -27,15 +27,15 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.ViewHolder> 
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        CheckedListItem view = (CheckedListItem) LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.list_item_match, parent, false);
-        return new ViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        ListItemMatchBinding binding = ListItemMatchBinding.inflate(
+                LayoutInflater.from(parent.getContext()), parent, false);
+        return new ViewHolder(binding);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(matchItems.get(position));
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        ((ViewHolder) holder).bind(matchItems.get(position));
     }
 
     @Override
@@ -43,29 +43,21 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.ViewHolder> 
         return matchItems.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView mainText;
-        private final TextView total;
-        private final TextView subtextLeft;
-        private final TextView subtextRight;
-        private final CheckedListItem itemView;
+    private class ViewHolder extends RecyclerView.ViewHolder {
+        private final ListItemMatchBinding binding;
 
-        public ViewHolder(@NonNull CheckedListItem itemView) {
-            super(itemView);
-            this.itemView = itemView;
-            mainText = itemView.findViewById(R.id.text_main);
-            total = itemView.findViewById(R.id.text_total);
-            subtextLeft = itemView.findViewById(R.id.text_sub_left);
-            subtextRight = itemView.findViewById(R.id.text_sub_right);
+        public ViewHolder(@NonNull ListItemMatchBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
         }
 
         public void bind(final MatchItem matchItem) {
-            mainText.setText(matchItem.paidTo());
-            total.setText(String.format(Locale.getDefault(), "%.2f", matchItem.total()));
-            subtextLeft.setText(matchItem.transactionDate());
-            subtextRight.setText(matchItem.docType());
+            binding.textMain.setText(matchItem.paidTo());
+            binding.textTotal.setText(String.format(Locale.getDefault(), "%.2f", matchItem.total()));
+            binding.textSubLeft.setText(matchItem.transactionDate());
+            binding.textSubRight.setText(matchItem.docType());
 
-            itemView.setOnItemClickListener(isChecked ->
+            binding.getRoot().setOnItemClickListener(isChecked ->
                     onItemCheckedListener.onItemChecked(matchItem, isChecked));
         }
     }

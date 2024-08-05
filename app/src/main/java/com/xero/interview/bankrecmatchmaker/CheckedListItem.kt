@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.Checkable
 import android.widget.LinearLayout
-import androidx.appcompat.widget.AppCompatCheckBox
+import com.xero.interview.bankrecmatchmaker.databinding.ListItemCheckboxBinding
 
 class CheckedListItem @JvmOverloads constructor(
     context: Context,
@@ -13,15 +13,13 @@ class CheckedListItem @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr), Checkable {
 
-    private val checkBox: AppCompatCheckBox
+    private val binding: ListItemCheckboxBinding
     private var onItemClickListener: OnItemClickListener? = null
 
     init {
         orientation = HORIZONTAL
 
-        checkBox = (LayoutInflater.from(context)
-            .inflate(R.layout.list_item_checkbox, this, false) as AppCompatCheckBox)
-            .also { addView(it, 0) }
+        binding = ListItemCheckboxBinding.inflate(LayoutInflater.from(context), this, true)
 
         setOnClickListener {
             toggle()
@@ -30,13 +28,13 @@ class CheckedListItem @JvmOverloads constructor(
     }
 
     override fun setChecked(checked: Boolean) {
-        checkBox.isChecked = checked
+        binding.checkbox.isChecked = checked
     }
 
-    override fun isChecked(): Boolean = checkBox.isChecked
+    override fun isChecked(): Boolean = binding.checkbox.isChecked
 
     override fun toggle() {
-        checkBox.toggle()
+        binding.checkbox.toggle()
     }
 
     interface OnItemClickListener {
