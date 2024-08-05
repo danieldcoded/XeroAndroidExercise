@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.xero.interview.bankrecmatchmaker.CheckedListItem
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.xero.interview.bankrecmatchmaker.CheckedListItem xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="center_vertical"
     android:paddingLeft="@dimen/default_content_padding"
-    android:paddingRight="@dimen/default_content_padding"
-    android:gravity="center_vertical">
+    android:paddingRight="@dimen/default_content_padding">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/list_item_height"
-        android:orientation="vertical"
-        android:layout_weight="1"
+        android:layout_marginStart="@dimen/default_content_padding"
         android:layout_marginLeft="@dimen/default_content_padding"
-        android:layout_marginStart="@dimen/default_content_padding">
+        android:layout_weight="1"
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/topCell"
@@ -28,13 +27,13 @@
                 style="@style/CellRegularText"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <TextView
                 android:id="@+id/text_total"
                 style="@style/CellRegularText"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
         <LinearLayout
@@ -48,14 +47,14 @@
                 android:id="@+id/text_sub_left"
                 style="@style/CellSubText"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TextView
                 android:id="@+id/text_sub_right"
                 style="@style/CellSubText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="right"/>
+                android:gravity="right" />
         </LinearLayout>
 
     </LinearLayout>

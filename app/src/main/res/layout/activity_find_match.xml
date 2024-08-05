@@ -18,14 +18,14 @@
 
     <TextView
         android:id="@+id/match_text"
-        android:background="?attr/colorPrimary"
         android:layout_width="match_parent"
         android:layout_height="36dp"
+        android:background="?attr/colorPrimary"
+        android:elevation="@dimen/toolbar_elevation"
         android:gravity="center"
         android:singleLine="true"
         android:textColor="@color/text_title_subtext"
-        android:textSize="@dimen/text_size_subtext"
-        android:elevation="@dimen/toolbar_elevation"/>
+        android:textSize="@dimen/text_size_subtext" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
