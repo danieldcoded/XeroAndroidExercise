@@ -52,10 +52,10 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.ViewHolder> 
         }
 
         public void bind(MatchItem matchItem) {
-            mainText.setText(matchItem.getPaidTo());
-            total.setText(String.format(Locale.getDefault(), "%.2f", matchItem.getTotal()));
-            subtextLeft.setText(matchItem.getTransactionDate());
-            subtextRight.setText(matchItem.getDocType());
+            mainText.setText(matchItem.paidTo());
+            total.setText(String.format(Locale.getDefault(), "%.2f", matchItem.total()));
+            subtextLeft.setText(matchItem.transactionDate());
+            subtextRight.setText(matchItem.docType());
         }
     }
 }
