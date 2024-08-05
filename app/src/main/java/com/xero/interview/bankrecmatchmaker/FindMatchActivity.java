@@ -17,6 +17,11 @@ public class FindMatchActivity extends AppCompatActivity {
     public static final String TARGET_MATCH_VALUE = "com.xero.interview.target_match_value";
     private static final float DEFAULT_TARGET_VALUE = 10000f;
 
+    private TextView matchText;
+    private RecyclerView recyclerView;
+    private MatchAdapter adapter;
+    private float remainingTotal;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,17 +43,28 @@ public class FindMatchActivity extends AppCompatActivity {
     }
 
     private void setupMatchText() {
-        float target = getIntent().getFloatExtra(TARGET_MATCH_VALUE, DEFAULT_TARGET_VALUE);
-        TextView matchText = findViewById(R.id.match_text);
-        matchText.setText(getString(R.string.select_matches, (int) target));
+        remainingTotal = getIntent().getFloatExtra(TARGET_MATCH_VALUE, DEFAULT_TARGET_VALUE);
+        matchText = findViewById(R.id.match_text);
+        updateRemainingTotal();
     }
 
     private void setupRecyclerView() {
-        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        MatchAdapter adapter = new MatchAdapter(buildMockData());
+        adapter = new MatchAdapter(buildMockData(), (matchItem, isChecked) -> {
+            if (isChecked) {
+                remainingTotal -= matchItem.total();
+            } else {
+                remainingTotal += matchItem.total();
+            }
+            updateRemainingTotal();
+        });
         recyclerView.setAdapter(adapter);
+    }
+
+    private void updateRemainingTotal() {
+        matchText.setText(getString(R.string.select_matches, (int) remainingTotal));
     }
 
     private List<MatchItem> buildMockData() {

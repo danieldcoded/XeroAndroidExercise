@@ -14,6 +14,7 @@ class CheckedListItem @JvmOverloads constructor(
 ) : LinearLayout(context, attrs, defStyleAttr), Checkable {
 
     private val checkBox: AppCompatCheckBox
+    private var onItemClickListener: OnItemClickListener? = null
 
     init {
         orientation = HORIZONTAL
@@ -22,7 +23,10 @@ class CheckedListItem @JvmOverloads constructor(
             .inflate(R.layout.list_item_checkbox, this, false) as AppCompatCheckBox)
             .also { addView(it, 0) }
 
-        setOnClickListener { toggle() }
+        setOnClickListener {
+            toggle()
+            onItemClickListener?.onItemClick(isChecked)
+        }
     }
 
     override fun setChecked(checked: Boolean) {
@@ -33,5 +37,13 @@ class CheckedListItem @JvmOverloads constructor(
 
     override fun toggle() {
         checkBox.toggle()
+    }
+
+    interface OnItemClickListener {
+        fun onItemClick(isChecked: Boolean)
+    }
+
+    fun setOnItemClickListener(listener: OnItemClickListener) {
+        onItemClickListener = listener
     }
 }
