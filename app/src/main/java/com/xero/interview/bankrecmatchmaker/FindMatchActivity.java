@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.xero.interview.bankrecmatchmaker.core.common.CurrencyFormatter;
+import com.xero.interview.bankrecmatchmaker.data.MockDataProvider;
 import com.xero.interview.bankrecmatchmaker.databinding.ActivityFindMatchBinding;
 
 import java.util.Arrays;
@@ -38,6 +39,7 @@ public class FindMatchActivity extends AppCompatActivity {
         currencyFormatter = new CurrencyFormatter(Locale.getDefault(), Currency.getInstance(Locale.getDefault()));
 
         setupToolbar();
+        setupMockData();
         setupMatchText();
         setupRecyclerView();
         selectMatchingItem();
@@ -52,6 +54,12 @@ public class FindMatchActivity extends AppCompatActivity {
         }
     }
 
+    private void setupMockData() {
+        MockDataProvider mockDataProvider = MockDataProvider.INSTANCE;
+        matchItems = mockDataProvider.getMockMatchItems();
+        totalToItemMap = mockDataProvider.getTotalToItemMap(matchItems);
+    }
+
     private void setupMatchText() {
         remainingTotal = getIntent().getFloatExtra(TARGET_MATCH_VALUE, DEFAULT_TARGET_VALUE);
         updateRemainingTotal();
@@ -60,7 +68,7 @@ public class FindMatchActivity extends AppCompatActivity {
     private void setupRecyclerView() {
         binding.recyclerView.setHasFixedSize(true);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MatchAdapter(buildMockData(), this::handleItemCheck, currencyFormatter);
+        adapter = new MatchAdapter(matchItems, this::handleItemCheck, currencyFormatter);
         binding.recyclerView.setAdapter(adapter);
     }
 
@@ -86,25 +94,4 @@ public class FindMatchActivity extends AppCompatActivity {
         }
     }
 
-    private List<MatchItem> buildMockData() {
-        matchItems = Arrays.asList(
-                new MatchItem("City Limousines", "30 Aug", 249.00f, "Sales Invoice"),
-                new MatchItem("Ridgeway University", "12 Sep", 618.50f, "Sales Invoice"),
-                new MatchItem("Cube Land", "22 Sep", 495.00f, "Sales Invoice"),
-                new MatchItem("Bayside Club", "23 Sep", 234.00f, "Sales Invoice"),
-                new MatchItem("SMART Agency", "12 Sep", 250f, "Sales Invoice"),
-                new MatchItem("PowerDirect", "11 Sep", 108.60f, "Sales Invoice"),
-                new MatchItem("PC Complete", "17 Sep", 216.99f, "Sales Invoice"),
-                new MatchItem("Truxton Properties", "17 Sep", 181.25f, "Sales Invoice"),
-                new MatchItem("MCO Cleaning Services", "17 Sep", 170.50f, "Sales Invoice"),
-                new MatchItem("Gateway Motors", "18 Sep", 411.35f, "Sales Invoice")
-        );
-
-        totalToItemMap = new HashMap<>();
-        for (MatchItem item : matchItems) {
-            totalToItemMap.put(item.total(), item);
-        }
-
-        return matchItems;
-    }
 }
