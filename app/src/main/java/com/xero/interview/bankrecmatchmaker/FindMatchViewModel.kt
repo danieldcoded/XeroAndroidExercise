@@ -25,6 +25,9 @@ class FindMatchViewModel : ViewModel() {
     private val _selectedItem = MutableLiveData<MatchItem?>()
     val selectedItem: LiveData<MatchItem?> = _selectedItem
 
+    private val _error = MutableLiveData<String>()
+    val error: LiveData<String> = _error
+
     init {
         loadMockData()
     }
@@ -34,22 +37,42 @@ class FindMatchViewModel : ViewModel() {
     }
 
     fun setInitialTotal(total: Float) {
+        if (total < 0) {
+            _error.value = "Initial total cannot be negative"
+            return
+        }
         _remainingTotal.value = total
         updateFormattedTotal()
     }
 
     fun handleItemCheck(item: MatchItem, isChecked: Boolean) {
-        val currentTotal = _remainingTotal.value ?: return
+        val currentTotal = _remainingTotal.value ?: run {
+            _error.value = "Remaining total is not initialized"
+            return
+        }
         val newTotal = if (isChecked) currentTotal - item.total() else currentTotal + item.total()
+        if (newTotal < 0) {
+            _error.value = "Insufficient remaining total. Please unselect other items first."
+            return
+        }
         _remainingTotal.value = newTotal
         updateFormattedTotal()
+    }
+
+    fun canSelectItem(item: MatchItem): Boolean {
+        val currentTotal = _remainingTotal.value ?: return false
+        return currentTotal - item.total() >= 0
     }
 
     fun selectMatchingItem() {
         val matchingItem = mockDataProvider.getTotalToItemMap(
             _matchItems.value ?: emptyList()
         )[_remainingTotal.value]
-        _selectedItem.value = matchingItem
+        if (matchingItem == null) {
+            _error.value = "No matching item found"
+        } else {
+            _selectedItem.value = matchingItem
+        }
     }
 
     private fun updateFormattedTotal() {

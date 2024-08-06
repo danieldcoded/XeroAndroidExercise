@@ -1,6 +1,7 @@
 package com.xero.interview.bankrecmatchmaker;
 
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -51,7 +52,7 @@ public class FindMatchActivity extends AppCompatActivity {
     private void setupRecyclerView() {
         binding.recyclerView.setHasFixedSize(true);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MatchAdapter(this::handleItemCheck);
+        adapter = new MatchAdapter(this::handleItemCheck, viewModel);
         binding.recyclerView.setAdapter(adapter);
     }
 
@@ -66,11 +67,21 @@ public class FindMatchActivity extends AppCompatActivity {
             }
         });
 
+        viewModel.getError().observe(this, errorMessage -> {
+            if (errorMessage != null) {
+                showErrorMessage(errorMessage);
+            }
+        });
+
         viewModel.selectMatchingItem();
     }
 
     private void handleItemCheck(MatchItem item, boolean isChecked) {
         viewModel.handleItemCheck(item, isChecked);
+    }
+
+    private void showErrorMessage(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
 }

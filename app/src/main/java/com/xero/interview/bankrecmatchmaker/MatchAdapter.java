@@ -20,18 +20,23 @@ public class MatchAdapter extends ListAdapter<MatchItem, MatchAdapter.ViewHolder
     private final OnItemCheckedListener onItemCheckedListener;
     private final CurrencyFormatter currencyFormatter;
     private final Set<MatchItem> selectedItems = new HashSet<>();
+    private final FindMatchViewModel viewModel;
 
     public interface OnItemCheckedListener {
         void onItemChecked(MatchItem item, boolean isChecked);
     }
 
-    public MatchAdapter(OnItemCheckedListener listener) {
+    public MatchAdapter(OnItemCheckedListener listener, FindMatchViewModel viewModel) {
         super(DIFF_CALLBACK);
         this.onItemCheckedListener = listener;
         this.currencyFormatter = new CurrencyFormatter(Locale.getDefault(), java.util.Currency.getInstance(Locale.getDefault()));
+        this.viewModel = viewModel;
     }
 
     public void setItemSelected(MatchItem item, boolean isSelected) {
+        if (isSelected && !viewModel.canSelectItem(item)) {
+            return;
+        }
         if (isSelected) {
             selectedItems.add(item);
         } else {
@@ -51,7 +56,9 @@ public class MatchAdapter extends ListAdapter<MatchItem, MatchAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MatchItem item = getItem(position);
-        holder.bind(item, selectedItems.contains(item));
+        boolean isSelected = selectedItems.contains(item);
+        boolean canSelect = viewModel.canSelectItem(item);
+        holder.bind(item, isSelected, canSelect);
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -62,17 +69,20 @@ public class MatchAdapter extends ListAdapter<MatchItem, MatchAdapter.ViewHolder
             this.binding = binding;
         }
 
-        void bind(final MatchItem matchItem, boolean isSelected) {
+        void bind(final MatchItem matchItem, boolean isSelected, boolean canSelect) {
             binding.textMain.setText(matchItem.paidTo());
             binding.textTotal.setText(currencyFormatter.format(matchItem.total()));
             binding.textSubLeft.setText(matchItem.transactionDate());
             binding.textSubRight.setText(matchItem.docType());
 
+            binding.getRoot().setEnabled(canSelect || isSelected);
             binding.getRoot().setChecked(isSelected);
             binding.getRoot().setOnClickListener(v -> {
-                boolean newCheckedState = !binding.getRoot().isChecked();
-                setItemSelected(matchItem, newCheckedState);
-                onItemCheckedListener.onItemChecked(matchItem, newCheckedState);
+                if (isSelected || canSelect) {
+                    boolean newCheckedState = !binding.getRoot().isChecked();
+                    setItemSelected(matchItem, newCheckedState);
+                    onItemCheckedListener.onItemChecked(matchItem, newCheckedState);
+                }
             });
         }
     }
