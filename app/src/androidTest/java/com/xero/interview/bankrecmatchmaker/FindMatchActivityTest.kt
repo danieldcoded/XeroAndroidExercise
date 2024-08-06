@@ -1,4 +1,4 @@
-package com.xero.interview.bankrecmatchmaker;
+package com.xero.interview.bankrecmatchmaker
 
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView

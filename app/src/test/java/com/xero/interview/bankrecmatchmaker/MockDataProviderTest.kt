@@ -1,4 +1,4 @@
-package com.xero.interview.bankrecmatchmaker;
+package com.xero.interview.bankrecmatchmaker
 
 import com.xero.interview.bankrecmatchmaker.data.MockDataProvider
 import org.junit.Assert.*
