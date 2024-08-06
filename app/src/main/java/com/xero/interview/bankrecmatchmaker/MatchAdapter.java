@@ -15,6 +15,11 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+/**
+ * An adapter for displaying a list of MatchItems in a RecyclerView.
+ * It extends the ListAdapter class and uses DiffUtil for efficient list updates.
+ * The adapter handles item selection and provides a listener interface for item click events.
+ */
 public class MatchAdapter extends ListAdapter<MatchItem, MatchAdapter.ViewHolder> {
 
     private final OnItemCheckedListener onItemCheckedListener;
@@ -22,10 +27,19 @@ public class MatchAdapter extends ListAdapter<MatchItem, MatchAdapter.ViewHolder
     private final Set<MatchItem> selectedItems = new HashSet<>();
     private final FindMatchViewModel viewModel;
 
+    /**
+     * An interface for handling item checked events.
+     */
     public interface OnItemCheckedListener {
         void onItemChecked(MatchItem item, boolean isChecked);
     }
 
+    /**
+     * Constructs a new MatchAdapter with the given listener and view model.
+     *
+     * @param listener  The listener for item checked events.
+     * @param viewModel The FindMatchViewModel instance.
+     */
     public MatchAdapter(OnItemCheckedListener listener, FindMatchViewModel viewModel) {
         super(DIFF_CALLBACK);
         this.onItemCheckedListener = listener;
@@ -33,6 +47,13 @@ public class MatchAdapter extends ListAdapter<MatchItem, MatchAdapter.ViewHolder
         this.viewModel = viewModel;
     }
 
+    /**
+     * Sets the selected state of an item.
+     * If the item cannot be selected based on the remaining total, the selection is ignored.
+     *
+     * @param item       The item to set the selected state for.
+     * @param isSelected The selected state to set.
+     */
     public void setItemSelected(MatchItem item, boolean isSelected) {
         if (isSelected && !viewModel.canSelectItem(item)) {
             return;
@@ -57,10 +78,13 @@ public class MatchAdapter extends ListAdapter<MatchItem, MatchAdapter.ViewHolder
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MatchItem item = getItem(position);
         boolean isSelected = selectedItems.contains(item);
-        boolean canSelect = viewModel.canSelectItem(item);
-        holder.bind(item, isSelected, canSelect);
+        holder.bind(item, isSelected);
     }
 
+    /**
+     * A ViewHolder for displaying a MatchItem in the RecyclerView.
+     * It binds the data to the views and handles item click events.
+     */
     class ViewHolder extends RecyclerView.ViewHolder {
         private final ListItemMatchBinding binding;
 
@@ -69,24 +93,31 @@ public class MatchAdapter extends ListAdapter<MatchItem, MatchAdapter.ViewHolder
             this.binding = binding;
         }
 
-        void bind(final MatchItem matchItem, boolean isSelected, boolean canSelect) {
+        /**
+         * Binds the MatchItem data to the views and sets up the click listener.
+         *
+         * @param matchItem  The MatchItem to bind.
+         * @param isSelected The selected state of the item.
+         */
+        void bind(final MatchItem matchItem, boolean isSelected) {
             binding.textMain.setText(matchItem.paidTo());
             binding.textTotal.setText(currencyFormatter.format(matchItem.total()));
             binding.textSubLeft.setText(matchItem.transactionDate());
             binding.textSubRight.setText(matchItem.docType());
 
-            binding.getRoot().setEnabled(canSelect || isSelected);
             binding.getRoot().setChecked(isSelected);
             binding.getRoot().setOnClickListener(v -> {
-                if (isSelected || canSelect) {
-                    boolean newCheckedState = !binding.getRoot().isChecked();
-                    setItemSelected(matchItem, newCheckedState);
-                    onItemCheckedListener.onItemChecked(matchItem, newCheckedState);
-                }
+                boolean newCheckedState = !binding.getRoot().isChecked();
+                setItemSelected(matchItem, newCheckedState);
+                onItemCheckedListener.onItemChecked(matchItem, newCheckedState);
             });
         }
     }
 
+    /**
+     * A DiffUtil.ItemCallback implementation for comparing MatchItems.
+     * It defines how to determine if two items are the same and if their contents have changed.
+     */
     private static final DiffUtil.ItemCallback<MatchItem> DIFF_CALLBACK = new DiffUtil.ItemCallback<MatchItem>() {
         @Override
         public boolean areItemsTheSame(@NonNull MatchItem oldItem, @NonNull MatchItem newItem) {

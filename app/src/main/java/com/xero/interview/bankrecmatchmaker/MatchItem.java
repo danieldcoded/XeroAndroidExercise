@@ -4,6 +4,11 @@ import androidx.annotation.NonNull;
 
 import java.util.Objects;
 
+/**
+ * Represents a match item with details such as paid to, transaction date, total amount, and document type.
+ * This class is immutable and provides a constructor and getter methods for accessing the item details.
+ * It also overrides the equals() and toString() methods for proper comparison and string representation.
+ */
 public record MatchItem(String paidTo, String transactionDate, Float total, String docType) {
 
     public MatchItem(@NonNull String paidTo, @NonNull String transactionDate, @NonNull Float total, @NonNull String docType) {
@@ -58,4 +63,5 @@ public record MatchItem(String paidTo, String transactionDate, Float total, Stri
                 ", docType='" + docType + '\'' +
                 '}';
     }
+
 }

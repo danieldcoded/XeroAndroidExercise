@@ -11,6 +11,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.xero.interview.bankrecmatchmaker.databinding.ActivityFindMatchBinding;
 
+/**
+ * The main activity of the BankRecMatchmaker app.
+ * It displays a list of match items and allows the user to select items to match a target total.
+ * The activity uses data binding to interact with the layout and the FindMatchViewModel.
+ */
 public class FindMatchActivity extends AppCompatActivity {
 
     public static final String TARGET_MATCH_VALUE = "com.xero.interview.target_match_value";
@@ -35,6 +40,9 @@ public class FindMatchActivity extends AppCompatActivity {
         observeViewModel();
     }
 
+    /**
+     * Sets up the toolbar with the app title and a back button.
+     */
     private void setupToolbar() {
         setSupportActionBar(binding.toolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -44,11 +52,19 @@ public class FindMatchActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Sets up the initial total to match based on the value passed through the intent extras.
+     * If no value is provided, a default target value is used.
+     */
     private void setupInitialTotal() {
         float initialTotal = getIntent().getFloatExtra(TARGET_MATCH_VALUE, DEFAULT_TARGET_VALUE);
         viewModel.setInitialTotal(initialTotal);
     }
 
+    /**
+     * Sets up the RecyclerView with the MatchAdapter and a LinearLayoutManager.
+     * The adapter is responsible for displaying the list of match items and handling item selection.
+     */
     private void setupRecyclerView() {
         binding.recyclerView.setHasFixedSize(true);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -56,14 +72,21 @@ public class FindMatchActivity extends AppCompatActivity {
         binding.recyclerView.setAdapter(adapter);
     }
 
+    /**
+     * Observes the LiveData properties of the FindMatchViewModel and updates the UI accordingly.
+     * It observes the list of match items, selected items, and error messages.
+     * It also triggers the automatic selection of matching items.
+     */
     private void observeViewModel() {
         viewModel.getMatchItems().observe(this, matchItems ->
                 adapter.submitList(matchItems));
 
-        viewModel.getSelectedItem().observe(this, selectedItem -> {
-            if (selectedItem != null) {
-                adapter.setItemSelected(selectedItem, true);
-                handleItemCheck(selectedItem, true);
+        viewModel.getSelectedItems().observe(this, selectedItems -> {
+            if (selectedItems != null && !selectedItems.isEmpty()) {
+                for (MatchItem item : selectedItems) {
+                    adapter.setItemSelected(item, true);
+                    handleItemCheck(item, true);
+                }
             }
         });
 
@@ -73,17 +96,29 @@ public class FindMatchActivity extends AppCompatActivity {
             }
         });
 
-        viewModel.selectMatchingItem();
+        viewModel.selectMatchingItems();
     }
 
+    /**
+     * Handles the checking/unchecking of an item.
+     * It calls the corresponding method in the FindMatchViewModel to update the remaining total.
+     *
+     * @param item      The item that was checked/unchecked.
+     * @param isChecked The checked state of the item.
+     */
     private void handleItemCheck(MatchItem item, boolean isChecked) {
         viewModel.handleItemCheck(item, isChecked);
     }
 
+    /**
+     * Displays an error message to the user using a Toast.
+     * TODO: Prevent the user from spamming error messages.
+     *       Add an interval or keep track of the last error displayed
+     *       to avoid displaying the same error multiple times.
+     *
+     * @param message The error message to display.
+     */
     private void showErrorMessage(String message) {
-        // TODO: PREVENT USER FROM BEING ABLE TO SPAM THIS
-        //  Could either add an interval or just keep track of the last error display
-        //  so the same error is not displayed twice.
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 

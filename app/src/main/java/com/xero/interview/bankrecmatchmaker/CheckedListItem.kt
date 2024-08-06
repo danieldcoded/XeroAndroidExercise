@@ -7,6 +7,12 @@ import android.widget.Checkable
 import android.widget.LinearLayout
 import com.xero.interview.bankrecmatchmaker.databinding.ListItemCheckboxBinding
 
+/**
+ * A custom LinearLayout that implements the Checkable interface.
+ * It represents a list item with a checkbox and handles the checked state.
+ * The checked state can be toggled by clicking on the item.
+ * It also provides a listener interface to notify when the checked state changes.
+ */
 class CheckedListItem @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -37,11 +43,11 @@ class CheckedListItem @JvmOverloads constructor(
         binding.checkbox.toggle()
     }
 
+    /**
+     * An interface to notify when the checked state of the item changes.
+     */
     interface OnItemClickListener {
         fun onItemClick(isChecked: Boolean)
     }
 
-    fun setOnItemClickListener(listener: OnItemClickListener) {
-        onItemClickListener = listener
-    }
 }
