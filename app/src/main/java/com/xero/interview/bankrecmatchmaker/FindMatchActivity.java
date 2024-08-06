@@ -82,6 +82,8 @@ public class FindMatchActivity extends AppCompatActivity {
 
     private void showErrorMessage(String message) {
         // TODO: PREVENT USER FROM BEING ABLE TO SPAM THIS
+        //  Could either add an interval or just keep track of the last error display
+        //  so the same error is not displayed twice.
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
