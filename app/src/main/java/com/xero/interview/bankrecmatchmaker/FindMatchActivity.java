@@ -11,8 +11,10 @@ import com.xero.interview.bankrecmatchmaker.databinding.ActivityFindMatchBinding
 
 import java.util.Arrays;
 import java.util.Currency;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class FindMatchActivity extends AppCompatActivity {
 
@@ -23,6 +25,8 @@ public class FindMatchActivity extends AppCompatActivity {
     private MatchAdapter adapter;
     private float remainingTotal;
     private CurrencyFormatter currencyFormatter;
+    private List<MatchItem> matchItems;
+    private Map<Float, MatchItem> totalToItemMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +40,7 @@ public class FindMatchActivity extends AppCompatActivity {
         setupToolbar();
         setupMatchText();
         setupRecyclerView();
+        selectMatchingItem();
     }
 
     private void setupToolbar() {
@@ -55,15 +60,17 @@ public class FindMatchActivity extends AppCompatActivity {
     private void setupRecyclerView() {
         binding.recyclerView.setHasFixedSize(true);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MatchAdapter(buildMockData(), (matchItem, isChecked) -> {
-            if (isChecked) {
-                remainingTotal -= matchItem.total();
-            } else {
-                remainingTotal += matchItem.total();
-            }
-            updateRemainingTotal();
-        }, currencyFormatter);
+        adapter = new MatchAdapter(buildMockData(), this::handleItemCheck, currencyFormatter);
         binding.recyclerView.setAdapter(adapter);
+    }
+
+    private void handleItemCheck(MatchItem item, boolean isChecked) {
+        if (isChecked) {
+            remainingTotal -= item.total();
+        } else {
+            remainingTotal += item.total();
+        }
+        updateRemainingTotal();
     }
 
     private void updateRemainingTotal() {
@@ -71,8 +78,16 @@ public class FindMatchActivity extends AppCompatActivity {
         binding.matchText.setText(getString(R.string.select_matches, formattedTotal));
     }
 
+    private void selectMatchingItem() {
+        MatchItem matchingItem = totalToItemMap.get(remainingTotal);
+        if (matchingItem != null) {
+            adapter.setItemSelected(matchingItem, true);
+            handleItemCheck(matchingItem, true);
+        }
+    }
+
     private List<MatchItem> buildMockData() {
-        return Arrays.asList(
+        matchItems = Arrays.asList(
                 new MatchItem("City Limousines", "30 Aug", 249.00f, "Sales Invoice"),
                 new MatchItem("Ridgeway University", "12 Sep", 618.50f, "Sales Invoice"),
                 new MatchItem("Cube Land", "22 Sep", 495.00f, "Sales Invoice"),
@@ -84,5 +99,12 @@ public class FindMatchActivity extends AppCompatActivity {
                 new MatchItem("MCO Cleaning Services", "17 Sep", 170.50f, "Sales Invoice"),
                 new MatchItem("Gateway Motors", "18 Sep", 411.35f, "Sales Invoice")
         );
+
+        totalToItemMap = new HashMap<>();
+        for (MatchItem item : matchItems) {
+            totalToItemMap.put(item.total(), item);
+        }
+
+        return matchItems;
     }
 }
