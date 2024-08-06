@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -12,7 +13,7 @@ import com.xero.interview.bankrecmatchmaker.databinding.ActivityFindMatchBinding
 public class FindMatchActivity extends AppCompatActivity {
 
     public static final String TARGET_MATCH_VALUE = "com.xero.interview.target_match_value";
-    private static final float DEFAULT_TARGET_VALUE = 249.00f;
+    private static final float DEFAULT_TARGET_VALUE = 1000.00f;
 
     private ActivityFindMatchBinding binding;
     private MatchAdapter adapter;
@@ -21,10 +22,11 @@ public class FindMatchActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityFindMatchBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_find_match);
 
         viewModel = new ViewModelProvider(this).get(FindMatchViewModel.class);
+        binding.setViewModel(viewModel);
+        binding.setLifecycleOwner(this);
 
         setupToolbar();
         setupInitialTotal();
@@ -56,9 +58,6 @@ public class FindMatchActivity extends AppCompatActivity {
     private void observeViewModel() {
         viewModel.getMatchItems().observe(this, matchItems ->
                 adapter.submitList(matchItems));
-
-        viewModel.getFormattedTotal().observe(this, formattedTotal ->
-                binding.matchText.setText(getString(R.string.select_matches, formattedTotal)));
 
         viewModel.getSelectedItem().observe(this, selectedItem -> {
             if (selectedItem != null) {
