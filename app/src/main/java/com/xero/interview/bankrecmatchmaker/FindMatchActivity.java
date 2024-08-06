@@ -4,30 +4,19 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.xero.interview.bankrecmatchmaker.core.common.CurrencyFormatter;
-import com.xero.interview.bankrecmatchmaker.data.MockDataProvider;
 import com.xero.interview.bankrecmatchmaker.databinding.ActivityFindMatchBinding;
-
-import java.util.Arrays;
-import java.util.Currency;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 public class FindMatchActivity extends AppCompatActivity {
 
     public static final String TARGET_MATCH_VALUE = "com.xero.interview.target_match_value";
-    private static final float DEFAULT_TARGET_VALUE = 10000f;
+    private static final float DEFAULT_TARGET_VALUE = 249.00f;
 
     private ActivityFindMatchBinding binding;
     private MatchAdapter adapter;
-    private float remainingTotal;
-    private CurrencyFormatter currencyFormatter;
-    private List<MatchItem> matchItems;
-    private Map<Float, MatchItem> totalToItemMap;
+    private FindMatchViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,14 +24,12 @@ public class FindMatchActivity extends AppCompatActivity {
         binding = ActivityFindMatchBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Initialize CurrencyFormatter
-        currencyFormatter = new CurrencyFormatter(Locale.getDefault(), Currency.getInstance(Locale.getDefault()));
+        viewModel = new ViewModelProvider(this).get(FindMatchViewModel.class);
 
         setupToolbar();
-        setupMockData();
-        setupMatchText();
+        setupInitialTotal();
         setupRecyclerView();
-        selectMatchingItem();
+        observeViewModel();
     }
 
     private void setupToolbar() {
@@ -54,44 +41,37 @@ public class FindMatchActivity extends AppCompatActivity {
         }
     }
 
-    private void setupMockData() {
-        MockDataProvider mockDataProvider = MockDataProvider.INSTANCE;
-        matchItems = mockDataProvider.getMockMatchItems();
-        totalToItemMap = mockDataProvider.getTotalToItemMap(matchItems);
-    }
-
-    private void setupMatchText() {
-        remainingTotal = getIntent().getFloatExtra(TARGET_MATCH_VALUE, DEFAULT_TARGET_VALUE);
-        updateRemainingTotal();
+    private void setupInitialTotal() {
+        float initialTotal = getIntent().getFloatExtra(TARGET_MATCH_VALUE, DEFAULT_TARGET_VALUE);
+        viewModel.setInitialTotal(initialTotal);
     }
 
     private void setupRecyclerView() {
         binding.recyclerView.setHasFixedSize(true);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MatchAdapter(matchItems, this::handleItemCheck, currencyFormatter);
+        adapter = new MatchAdapter(this::handleItemCheck);
         binding.recyclerView.setAdapter(adapter);
     }
 
+    private void observeViewModel() {
+        viewModel.getMatchItems().observe(this, matchItems ->
+                adapter.submitList(matchItems));
+
+        viewModel.getFormattedTotal().observe(this, formattedTotal ->
+                binding.matchText.setText(getString(R.string.select_matches, formattedTotal)));
+
+        viewModel.getSelectedItem().observe(this, selectedItem -> {
+            if (selectedItem != null) {
+                adapter.setItemSelected(selectedItem, true);
+                handleItemCheck(selectedItem, true);
+            }
+        });
+
+        viewModel.selectMatchingItem();
+    }
+
     private void handleItemCheck(MatchItem item, boolean isChecked) {
-        if (isChecked) {
-            remainingTotal -= item.total();
-        } else {
-            remainingTotal += item.total();
-        }
-        updateRemainingTotal();
-    }
-
-    private void updateRemainingTotal() {
-        String formattedTotal = currencyFormatter.format(remainingTotal);
-        binding.matchText.setText(getString(R.string.select_matches, formattedTotal));
-    }
-
-    private void selectMatchingItem() {
-        MatchItem matchingItem = totalToItemMap.get(remainingTotal);
-        if (matchingItem != null) {
-            adapter.setItemSelected(matchingItem, true);
-            handleItemCheck(matchingItem, true);
-        }
+        viewModel.handleItemCheck(item, isChecked);
     }
 
 }
