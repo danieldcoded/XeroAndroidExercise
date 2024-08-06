@@ -1,0 +1,56 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    // TODO: Extract common Gradle configuration into a reusable script
+    //
+    // If I had more time, I'd look at extracting the common Gradle configuration into a separate
+    // script file, like 'common.gradle'. This would make it easier to maintain across
+    // multiple modules as the project grows.
+    //
+    // The idea is to move shared settings like compileSdk, minSdk, and common dependencies into
+    // this 'common.gradle' file. Then, each module's build.gradle would just apply this script
+    // using 'apply from: 'path/to/common.gradle''.
+    //
+    // I'd also consider using Gradle variables for version numbers and explore the buildSrc
+    // directory for custom tasks and plugins that could be shared between modules.
+    //
+    // While it might take a bit of upfront effort, I reckon this approach would save time and
+    // reduce errors in the long run. It would make the Gradle setup more maintainable and show
+    // that I understand how to optimise build configuration as the project scales.
+    namespace 'com.xero.interview.bankrecmatchmaker.core.common'
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 21
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+
+    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+}

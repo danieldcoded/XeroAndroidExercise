@@ -5,40 +5,49 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.Checkable
 import android.widget.LinearLayout
-import androidx.appcompat.widget.AppCompatCheckBox
+import com.xero.interview.bankrecmatchmaker.databinding.ListItemCheckboxBinding
 
-class CheckedListItem : LinearLayout, Checkable {
-    private var checkBox: AppCompatCheckBox? = null
+/**
+ * A custom LinearLayout that implements the Checkable interface.
+ * It represents a list item with a checkbox and handles the checked state.
+ * The checked state can be toggled by clicking on the item.
+ * It also provides a listener interface to notify when the checked state changes.
+ */
+class CheckedListItem @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : LinearLayout(context, attrs, defStyleAttr), Checkable {
 
-    constructor(context: Context) : super(context) {
-        init(context)
-    }
+    private val binding: ListItemCheckboxBinding
+    private var onItemClickListener: OnItemClickListener? = null
 
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        init(context)
-    }
-
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        init(context)
-    }
-
-    private fun init(context: Context) {
-        val layoutInflater = LayoutInflater.from(context)
+    init {
         orientation = HORIZONTAL
-        checkBox = layoutInflater.inflate(R.layout.list_item_checkbox, this, false) as AppCompatCheckBox
-        addView(checkBox, 0)
-        setOnClickListener { checkBox!!.toggle() }
+
+        binding = ListItemCheckboxBinding.inflate(LayoutInflater.from(context), this, true)
+
+        setOnClickListener {
+            toggle()
+            onItemClickListener?.onItemClick(isChecked)
+        }
     }
 
     override fun setChecked(checked: Boolean) {
-        checkBox!!.isChecked = checked
+        binding.checkbox.isChecked = checked
     }
 
-    override fun isChecked(): Boolean {
-        return checkBox!!.isChecked
-    }
+    override fun isChecked(): Boolean = binding.checkbox.isChecked
 
     override fun toggle() {
-        checkBox!!.toggle()
+        binding.checkbox.toggle()
     }
+
+    /**
+     * An interface to notify when the checked state of the item changes.
+     */
+    interface OnItemClickListener {
+        fun onItemClick(isChecked: Boolean)
+    }
+
 }
