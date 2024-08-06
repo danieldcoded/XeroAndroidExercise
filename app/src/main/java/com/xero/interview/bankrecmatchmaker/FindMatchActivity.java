@@ -81,6 +81,7 @@ public class FindMatchActivity extends AppCompatActivity {
     }
 
     private void showErrorMessage(String message) {
+        // TODO: PREVENT USER FROM BEING ABLE TO SPAM THIS
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
