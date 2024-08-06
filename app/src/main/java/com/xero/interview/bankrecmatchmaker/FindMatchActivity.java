@@ -6,9 +6,11 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.xero.interview.bankrecmatchmaker.core.common.CurrencyFormatter;
 import com.xero.interview.bankrecmatchmaker.databinding.ActivityFindMatchBinding;
 
 import java.util.Arrays;
+import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
 
@@ -20,12 +22,16 @@ public class FindMatchActivity extends AppCompatActivity {
     private ActivityFindMatchBinding binding;
     private MatchAdapter adapter;
     private float remainingTotal;
+    private CurrencyFormatter currencyFormatter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityFindMatchBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // Initialize CurrencyFormatter
+        currencyFormatter = new CurrencyFormatter(Locale.getDefault(), Currency.getInstance(Locale.getDefault()));
 
         setupToolbar();
         setupMatchText();
@@ -56,12 +62,13 @@ public class FindMatchActivity extends AppCompatActivity {
                 remainingTotal += matchItem.total();
             }
             updateRemainingTotal();
-        });
+        }, currencyFormatter);
         binding.recyclerView.setAdapter(adapter);
     }
 
     private void updateRemainingTotal() {
-        binding.matchText.setText(String.format(Locale.getDefault(), getString(R.string.select_matches), remainingTotal));
+        String formattedTotal = currencyFormatter.format(remainingTotal);
+        binding.matchText.setText(getString(R.string.select_matches, formattedTotal));
     }
 
     private List<MatchItem> buildMockData() {

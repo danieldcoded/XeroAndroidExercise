@@ -6,23 +6,25 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.xero.interview.bankrecmatchmaker.core.common.CurrencyFormatter;
 import com.xero.interview.bankrecmatchmaker.databinding.ListItemMatchBinding;
 
 import java.util.List;
-import java.util.Locale;
 
 public class MatchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final List<MatchItem> matchItems;
     private final OnItemCheckedListener onItemCheckedListener;
+    private final CurrencyFormatter currencyFormatter;
 
     public interface OnItemCheckedListener {
         void onItemChecked(MatchItem item, boolean isChecked);
     }
 
-    public MatchAdapter(List<MatchItem> matchItems, OnItemCheckedListener listener) {
+    public MatchAdapter(List<MatchItem> matchItems, OnItemCheckedListener listener, CurrencyFormatter currencyFormatter) {
         this.matchItems = matchItems;
         this.onItemCheckedListener = listener;
+        this.currencyFormatter = currencyFormatter;
     }
 
     @NonNull
@@ -53,7 +55,7 @@ public class MatchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
         public void bind(final MatchItem matchItem) {
             binding.textMain.setText(matchItem.paidTo());
-            binding.textTotal.setText(String.format(Locale.getDefault(), "%.2f", matchItem.total()));
+            binding.textTotal.setText(currencyFormatter.format(matchItem.total()));
             binding.textSubLeft.setText(matchItem.transactionDate());
             binding.textSubRight.setText(matchItem.docType());
 
