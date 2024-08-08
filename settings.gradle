@@ -1,2 +1,3 @@
 include ':app'
 include ':core:common'
+include ':data:accounting_records'

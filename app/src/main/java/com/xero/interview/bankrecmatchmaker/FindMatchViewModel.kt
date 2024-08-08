@@ -3,18 +3,21 @@ package com.xero.interview.bankrecmatchmaker
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.xero.interview.bankrecmatchmaker.core.common.CurrencyFormatter
-import com.xero.interview.bankrecmatchmaker.data.MockDataProvider
+import com.xero.interview.bankrecmatchmaker.data.accounting_records.model.AccountingRecord
+import com.xero.interview.bankrecmatchmaker.data.accounting_records.repo.AccountingRecordsRepository
+import kotlinx.coroutines.launch
 import java.util.*
 
-class FindMatchViewModel : ViewModel() {
+class FindMatchViewModel(private val repository: AccountingRecordsRepository) : ViewModel() {
 
     private val currencyFormatter =
         CurrencyFormatter(Locale.getDefault(), Currency.getInstance(Locale.getDefault()))
-    private val mockDataProvider = MockDataProvider
 
-    private val _matchItems = MutableLiveData<List<MatchItem>>()
-    val matchItems: LiveData<List<MatchItem>> = _matchItems
+    private val _accountingRecords = MutableLiveData<List<AccountingRecord>>(emptyList())
+    val accountingRecords: LiveData<List<AccountingRecord>> = _accountingRecords
 
     private val _remainingTotal = MutableLiveData<Float>()
     val remainingTotal: LiveData<Float> = _remainingTotal
@@ -22,14 +25,14 @@ class FindMatchViewModel : ViewModel() {
     private val _formattedTotal = MutableLiveData<String>()
     val formattedTotal: LiveData<String> = _formattedTotal
 
-    private val _selectedItems = MutableLiveData<List<MatchItem?>>()
-    val selectedItems: LiveData<List<MatchItem?>> = _selectedItems
+    private val _selectedItems = MutableLiveData<List<AccountingRecord>>()
+    val selectedItems: LiveData<List<AccountingRecord>> = _selectedItems
 
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> = _error
 
     init {
-        loadMockData()
+        loadAccountingRecords()
     }
 
     /**
@@ -37,14 +40,18 @@ class FindMatchViewModel : ViewModel() {
      * If there are no items to match against, it gracefully handles the scenario.
      * The _matchItems LiveData is observed by the UI to display the list of items.
      */
-    private fun loadMockData() {
-        val mockItems = mockDataProvider.getMockMatchItems()
-        if (mockItems.isEmpty()) {
-            // TODO: Handle the case when there are no items to match against gracefully.
-            //  Display an appropriate error message and navigate the user back.
-            return
+    private fun loadAccountingRecords() {
+        viewModelScope.launch {
+            try {
+                val records = repository.getAccountingRecords()
+                _accountingRecords.value = records
+                initialFilterOfData()
+            } catch (e: Exception) {
+                // TODO: Handle the case when there are no items to match against gracefully.
+                //  Display an appropriate error message and navigate the user back.
+                _error.value = "Failed to load accounting records: ${e.message}"
+            }
         }
-        _matchItems.value = mockItems
     }
 
     /**
@@ -75,7 +82,7 @@ class FindMatchViewModel : ViewModel() {
         val currentTotal = _remainingTotal.value ?: return
         // TODO: Handle the case when the total to match is lower than any match item gracefully.
         //  Display an appropriate error message and prevent the user from proceeding.
-        _matchItems.value = _matchItems.value?.filter { it.total() <= currentTotal }
+        _accountingRecords.value = _accountingRecords.value?.filter { it.total <= currentTotal }
     }
 
     /**
@@ -84,12 +91,12 @@ class FindMatchViewModel : ViewModel() {
      * It also updates the formatted total.
      * This function is called from the UI when an item is checked/unchecked.
      */
-    fun handleItemCheck(item: MatchItem, isChecked: Boolean) {
+    fun handleItemCheck(item: AccountingRecord, isChecked: Boolean) {
         val currentTotal = _remainingTotal.value ?: run {
             _error.value = "Remaining total is not initialized"
             return
         }
-        val newTotal = if (isChecked) currentTotal - item.total() else currentTotal + item.total()
+        val newTotal = if (isChecked) currentTotal - item.total else currentTotal + item.total
         if (newTotal < 0) {
             _error.value = "Insufficient remaining total.\nPlease unselect other items first."
             return
@@ -103,9 +110,9 @@ class FindMatchViewModel : ViewModel() {
      * Returns true if the item can be selected, false otherwise.
      * This function is used by the UI to determine if an item should be selectable.
      */
-    fun canSelectItem(item: MatchItem): Boolean {
+    fun canSelectItem(item: AccountingRecord): Boolean {
         val currentTotal = _remainingTotal.value ?: return false
-        return currentTotal - item.total() >= 0
+        return currentTotal - item.total >= 0
     }
 
     /**
@@ -118,8 +125,8 @@ class FindMatchViewModel : ViewModel() {
      */
     fun selectMatchingItems() {
         val currentTotal = _remainingTotal.value ?: return
-        val items = _matchItems.value ?: return
-        val totalToItemMap = mockDataProvider.getTotalToItemMap(items)
+        val items = _accountingRecords.value ?: return
+        val totalToItemMap = items.associateBy { it.total }
 
         // Filter out all items that exceed the current total sum,
         // as they are not relevant when trying to select an item or subset of items.
@@ -153,9 +160,9 @@ class FindMatchViewModel : ViewModel() {
      * @return A list of MatchItems that form a subset summing up to the target total, or an empty list if no subset is found.
      */
     private fun findSubsetOfMatchingItems(
-        itemMap: Map<Float, MatchItem>,
+        itemMap: Map<Float, AccountingRecord>,
         target: Float
-    ): List<MatchItem> {
+    ): List<AccountingRecord> {
         /**
          * Finding a subset of items that add up to a specific total is a well-known problem
          * called the "Subset Sum Problem" which is a specific case of the "Knapsack Problem".
@@ -215,8 +222,8 @@ class FindMatchViewModel : ViewModel() {
      *
      * @param items The list of items to select.
      */
-    private fun selectItems(items: List<MatchItem>) {
-        val selectedItems = mutableListOf<MatchItem>()
+    private fun selectItems(items: List<AccountingRecord>) {
+        val selectedItems = mutableListOf<AccountingRecord>()
         for (item in items) {
             if (canSelectItem(item)) {
                 selectedItems.add(item)
@@ -235,4 +242,13 @@ class FindMatchViewModel : ViewModel() {
         _formattedTotal.value = currencyFormatter.format(_remainingTotal.value ?: 0f)
     }
 
+    class Factory(private val repository: AccountingRecordsRepository) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(FindMatchViewModel::class.java)) {
+                @Suppress("UNCHECKED_CAST")
+                return FindMatchViewModel(repository) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
+        }
+    }
 }

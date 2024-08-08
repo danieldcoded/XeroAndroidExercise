@@ -1,133 +1,84 @@
-package com.xero.interview.bankrecmatchmaker;
+package com.xero.interview.bankrecmatchmaker
 
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
+import android.view.LayoutInflater
+import android.view.ViewGroup
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.ListAdapter;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 
-import com.xero.interview.bankrecmatchmaker.core.common.CurrencyFormatter;
-import com.xero.interview.bankrecmatchmaker.databinding.ListItemMatchBinding;
+import com.xero.interview.bankrecmatchmaker.core.common.CurrencyFormatter
+import com.xero.interview.bankrecmatchmaker.data.accounting_records.model.AccountingRecord
+import com.xero.interview.bankrecmatchmaker.databinding.ListItemMatchBinding
+import java.util.Currency
 
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
+import java.util.Locale
 
-/**
- * An adapter for displaying a list of MatchItems in a RecyclerView.
- * It extends the ListAdapter class and uses DiffUtil for efficient list updates.
- * The adapter handles item selection and provides a listener interface for item click events.
- */
-public class MatchAdapter extends ListAdapter<MatchItem, MatchAdapter.ViewHolder> {
+class MatchAdapter(
+    private val onItemCheckedListener: (AccountingRecord, Boolean) -> Unit,
+    private val viewModel: FindMatchViewModel
+) : ListAdapter<AccountingRecord, MatchAdapter.ViewHolder>(DIFF_CALLBACK) {
 
-    private final OnItemCheckedListener onItemCheckedListener;
-    private final CurrencyFormatter currencyFormatter;
-    private final Set<MatchItem> selectedItems = new HashSet<>();
-    private final FindMatchViewModel viewModel;
+    private val currencyFormatter =
+        CurrencyFormatter(Locale.getDefault(), Currency.getInstance(Locale.getDefault()))
+    private val selectedItems = mutableSetOf<AccountingRecord>()
 
-    /**
-     * An interface for handling item checked events.
-     */
-    public interface OnItemCheckedListener {
-        void onItemChecked(MatchItem item, boolean isChecked);
-    }
-
-    /**
-     * Constructs a new MatchAdapter with the given listener and view model.
-     *
-     * @param listener  The listener for item checked events.
-     * @param viewModel The FindMatchViewModel instance.
-     */
-    public MatchAdapter(OnItemCheckedListener listener, FindMatchViewModel viewModel) {
-        super(DIFF_CALLBACK);
-        this.onItemCheckedListener = listener;
-        this.currencyFormatter = new CurrencyFormatter(Locale.getDefault(), java.util.Currency.getInstance(Locale.getDefault()));
-        this.viewModel = viewModel;
-    }
-
-    /**
-     * Sets the selected state of an item.
-     * If the item cannot be selected based on the remaining total, the selection is ignored.
-     *
-     * @param item       The item to set the selected state for.
-     * @param isSelected The selected state to set.
-     */
-    public void setItemSelected(MatchItem item, boolean isSelected) {
+    fun setItemSelected(item: AccountingRecord, isSelected: Boolean) {
         if (isSelected && !viewModel.canSelectItem(item)) {
-            return;
+            return
         }
         if (isSelected) {
-            selectedItems.add(item);
+            selectedItems.add(item)
         } else {
-            selectedItems.remove(item);
+            selectedItems.remove(item)
         }
-        notifyItemChanged(getCurrentList().indexOf(item));
+        notifyItemChanged(currentList.indexOf(item))
     }
 
-    @NonNull
-    @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ListItemMatchBinding binding = ListItemMatchBinding.inflate(
-                LayoutInflater.from(parent.getContext()), parent, false);
-        return new ViewHolder(binding);
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val binding =
+            ListItemMatchBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        MatchItem item = getItem(position);
-        boolean isSelected = selectedItems.contains(item);
-        holder.bind(item, isSelected);
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val item = getItem(position)
+        val isSelected = selectedItems.contains(item)
+        holder.bind(item, isSelected)
     }
 
-    /**
-     * A ViewHolder for displaying a MatchItem in the RecyclerView.
-     * It binds the data to the views and handles item click events.
-     */
-    class ViewHolder extends RecyclerView.ViewHolder {
-        private final ListItemMatchBinding binding;
+    inner class ViewHolder(private val binding: ListItemMatchBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(accountingRecord: AccountingRecord, isSelected: Boolean) {
+            binding.textMain.text = accountingRecord.paidTo
+            binding.textTotal.text = currencyFormatter.format(accountingRecord.total)
+            binding.textSubLeft.text = accountingRecord.transactionDate
+            binding.textSubRight.text = accountingRecord.docType
 
-        ViewHolder(@NonNull ListItemMatchBinding binding) {
-            super(binding.getRoot());
-            this.binding = binding;
-        }
-
-        /**
-         * Binds the MatchItem data to the views and sets up the click listener.
-         *
-         * @param matchItem  The MatchItem to bind.
-         * @param isSelected The selected state of the item.
-         */
-        void bind(final MatchItem matchItem, boolean isSelected) {
-            binding.textMain.setText(matchItem.paidTo());
-            binding.textTotal.setText(currencyFormatter.format(matchItem.total()));
-            binding.textSubLeft.setText(matchItem.transactionDate());
-            binding.textSubRight.setText(matchItem.docType());
-
-            binding.getRoot().setChecked(isSelected);
-            binding.getRoot().setOnClickListener(v -> {
-                boolean newCheckedState = !binding.getRoot().isChecked();
-                setItemSelected(matchItem, newCheckedState);
-                onItemCheckedListener.onItemChecked(matchItem, newCheckedState);
-            });
+            binding.root.isChecked = isSelected
+            binding.root.setOnClickListener {
+                val newCheckedState = !binding.root.isChecked
+                setItemSelected(accountingRecord, newCheckedState)
+                onItemCheckedListener(accountingRecord, newCheckedState)
+            }
         }
     }
 
-    /**
-     * A DiffUtil.ItemCallback implementation for comparing MatchItems.
-     * It defines how to determine if two items are the same and if their contents have changed.
-     */
-    private static final DiffUtil.ItemCallback<MatchItem> DIFF_CALLBACK = new DiffUtil.ItemCallback<MatchItem>() {
-        @Override
-        public boolean areItemsTheSame(@NonNull MatchItem oldItem, @NonNull MatchItem newItem) {
-            return oldItem.equals(newItem);
-        }
+    companion object {
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<AccountingRecord>() {
+            override fun areItemsTheSame(
+                oldItem: AccountingRecord,
+                newItem: AccountingRecord
+            ): Boolean {
+                return oldItem.id == newItem.id
+            }
 
-        @Override
-        public boolean areContentsTheSame(@NonNull MatchItem oldItem, @NonNull MatchItem newItem) {
-            return oldItem.equals(newItem);
+            override fun areContentsTheSame(
+                oldItem: AccountingRecord,
+                newItem: AccountingRecord
+            ): Boolean {
+                return oldItem == newItem
+            }
         }
-    };
-
+    }
 }
