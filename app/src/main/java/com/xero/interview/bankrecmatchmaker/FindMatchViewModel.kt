@@ -8,13 +8,16 @@ import androidx.lifecycle.viewModelScope
 import com.xero.interview.bankrecmatchmaker.core.common.CurrencyFormatter
 import com.xero.interview.bankrecmatchmaker.data.accounting_records.model.AccountingRecord
 import com.xero.interview.bankrecmatchmaker.data.accounting_records.repo.AccountingRecordsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.util.*
+import javax.inject.Inject
 
-class FindMatchViewModel(private val repository: AccountingRecordsRepository) : ViewModel() {
-
-    private val currencyFormatter =
-        CurrencyFormatter(Locale.getDefault(), Currency.getInstance(Locale.getDefault()))
+@HiltViewModel
+class FindMatchViewModel @Inject constructor(
+    private val repository: AccountingRecordsRepository,
+    private val currencyFormatter: CurrencyFormatter
+) : ViewModel() {
 
     private val _accountingRecords = MutableLiveData<List<AccountingRecord>>(emptyList())
     val accountingRecords: LiveData<List<AccountingRecord>> = _accountingRecords
@@ -240,15 +243,5 @@ class FindMatchViewModel(private val repository: AccountingRecordsRepository) : 
      */
     private fun updateFormattedTotal() {
         _formattedTotal.value = currencyFormatter.format(_remainingTotal.value ?: 0f)
-    }
-
-    class Factory(private val repository: AccountingRecordsRepository) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(FindMatchViewModel::class.java)) {
-                @Suppress("UNCHECKED_CAST")
-                return FindMatchViewModel(repository) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
     }
 }

@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
+        android:name=".BankRecMatchmakerApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -9,9 +10,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name="com.xero.interview.bankrecmatchmaker.FindMatchActivity"
-                android:theme="@style/AppTheme.NoActionBar"
-                android:exported="true">
+
+        <activity
+            android:name="com.xero.interview.bankrecmatchmaker.FindMatchActivity"
+            android:exported="true"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

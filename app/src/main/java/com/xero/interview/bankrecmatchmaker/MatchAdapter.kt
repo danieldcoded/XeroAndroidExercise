@@ -16,7 +16,7 @@ import java.util.Locale
 
 class MatchAdapter(
     private val onItemCheckedListener: (AccountingRecord, Boolean) -> Unit,
-    private val viewModel: FindMatchViewModel
+    private val canSelectItem: (AccountingRecord) -> Boolean
 ) : ListAdapter<AccountingRecord, MatchAdapter.ViewHolder>(DIFF_CALLBACK) {
 
     private val currencyFormatter =
@@ -24,7 +24,7 @@ class MatchAdapter(
     private val selectedItems = mutableSetOf<AccountingRecord>()
 
     fun setItemSelected(item: AccountingRecord, isSelected: Boolean) {
-        if (isSelected && !viewModel.canSelectItem(item)) {
+        if (isSelected && !canSelectItem(item)) {
             return
         }
         if (isSelected) {

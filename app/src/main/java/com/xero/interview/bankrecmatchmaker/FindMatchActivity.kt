@@ -4,33 +4,29 @@ import android.os.Bundle
 import android.widget.Toast
 
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.activity.viewModels
 
 import com.xero.interview.bankrecmatchmaker.data.accounting_records.model.AccountingRecord
-import com.xero.interview.bankrecmatchmaker.data.accounting_records.repo.AccountingRecordsRepository
-import com.xero.interview.bankrecmatchmaker.data.accounting_records.source.MockAccountingRecordsDataSource
 import com.xero.interview.bankrecmatchmaker.databinding.ActivityFindMatchBinding
+import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * The main activity of the BankRecMatchmaker app.
  * It displays a list of match items and allows the user to select items to match a target total.
  * The activity uses data binding to interact with the layout and the FindMatchViewModel.
  */
+@AndroidEntryPoint
 class FindMatchActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityFindMatchBinding
     private lateinit var adapter: MatchAdapter
-    private lateinit var viewModel: FindMatchViewModel
+    private val viewModel: FindMatchViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityFindMatchBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        val repository = AccountingRecordsRepository(MockAccountingRecordsDataSource())
-        val viewModelFactory = FindMatchViewModel.Factory(repository)
-        viewModel = ViewModelProvider(this, viewModelFactory)[FindMatchViewModel::class.java]
 
         // Set the ViewModel for data binding
         binding.viewModel = viewModel
@@ -57,7 +53,7 @@ class FindMatchActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = MatchAdapter(::handleItemCheck, viewModel)
+        adapter = MatchAdapter(viewModel::handleItemCheck, viewModel::canSelectItem)
         binding.recyclerView.adapter = adapter
     }
 
