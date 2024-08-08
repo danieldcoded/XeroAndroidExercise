@@ -71,12 +71,34 @@ class MatchSelector {
         items: Map<Float, AccountingRecord>,
         targetTotal: Float
     ): List<AccountingRecord> {
-        // TODO: Implement Dynamic Programming approach
-        // Steps:
-        // 1. Create a DP table
-        // 2. Fill the table
-        // 3. Backtrack to find the actual subset
-        return emptyList()
+        val targetCents = (targetTotal * 100).toInt()
+        val dp = BooleanArray(targetCents + 1) { false }
+        dp[0] = true
+
+        val itemList = items.values.toList()
+        for (item in itemList) {
+            val itemCents = (item.total * 100).toInt()
+            for (i in targetCents downTo itemCents) {
+                dp[i] = dp[i] || dp[i - itemCents]
+            }
+        }
+
+        if (!dp[targetCents]) {
+            return emptyList()
+        }
+
+        val selectedItems = mutableListOf<AccountingRecord>()
+        var remainingSum = targetCents
+
+        for (item in itemList.asReversed()) {
+            val itemCents = (item.total * 100).toInt()
+            if (remainingSum >= itemCents && dp[remainingSum - itemCents]) {
+                selectedItems.add(item)
+                remainingSum -= itemCents
+            }
+        }
+
+        return selectedItems
     }
 
     /**
@@ -92,12 +114,32 @@ class MatchSelector {
         items: Map<Float, AccountingRecord>,
         targetTotal: Float
     ): List<AccountingRecord> {
-        // TODO: Implement Backtracking approach
-        // Steps:
-        // 1. Define a recursive function that tries including/excluding each item
-        // 2. If current sum equals target, return the current subset
-        // 3. If current sum exceeds target or all items exhausted, backtrack
-        return emptyList()
+        val itemList = items.values.toList()
+        val result = mutableListOf<AccountingRecord>()
+        var bestResult = listOf<AccountingRecord>()
+
+        fun backtrack(index: Int, currentSum: Float) {
+            if (currentSum == targetTotal) {
+                if (result.size < bestResult.size || bestResult.isEmpty()) {
+                    bestResult = result.toList()
+                }
+                return
+            }
+            if (index >= itemList.size || currentSum > targetTotal) {
+                return
+            }
+
+            // Include current item
+            result.add(itemList[index])
+            backtrack(index + 1, currentSum + itemList[index].total)
+            result.removeAt(result.size - 1)
+
+            // Exclude current item
+            backtrack(index + 1, currentSum)
+        }
+
+        backtrack(0, 0f)
+        return bestResult
     }
 
     /**
@@ -115,12 +157,21 @@ class MatchSelector {
         items: Map<Float, AccountingRecord>,
         targetTotal: Float
     ): List<AccountingRecord> {
-        // TODO: Implement Greedy approach
-        // Steps:
-        // 1. Sort items by total (descending)
-        // 2. Iterate through items, adding to result if it doesn't exceed target
-        // 3. Return result if exact match, otherwise empty list
-        return emptyList()
+        val sortedItems = items.values.sortedByDescending { it.total }
+        var currentSum = 0f
+        val result = mutableListOf<AccountingRecord>()
+
+        for (item in sortedItems) {
+            if (currentSum + item.total <= targetTotal) {
+                result.add(item)
+                currentSum += item.total
+                if (currentSum == targetTotal) {
+                    return result
+                }
+            }
+        }
+
+        return if (currentSum == targetTotal) result else emptyList()
     }
 
 }
