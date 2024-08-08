@@ -26,7 +26,7 @@ class MatchSelectorTest {
     @Test
     fun `test exact match with all strategies`() {
         val items = createTestItems()
-        MatchSelector.MatchingStrategy.values().forEach { strategy ->
+        MatchSelector.MatchingStrategy.entries.forEach { strategy ->
             val result = matchSelector.selectMatchingItems(items, 200f, strategy)
             assertEquals("Strategy: $strategy", 1, result.size)
             assertEquals("Strategy: $strategy", 200f, result[0].total)
@@ -36,7 +36,7 @@ class MatchSelectorTest {
     @Test
     fun `test subset match with all strategies`() {
         val items = createTestItems()
-        MatchSelector.MatchingStrategy.values().forEach { strategy ->
+        MatchSelector.MatchingStrategy.entries.forEach { strategy ->
             val result = matchSelector.selectMatchingItems(items, 300f, strategy)
             assertEquals("Strategy: $strategy", 2, result.size)
             assertEquals(
@@ -50,7 +50,7 @@ class MatchSelectorTest {
     @Test
     fun `test no match with all strategies`() {
         val items = createTestItems()
-        MatchSelector.MatchingStrategy.values().forEach { strategy ->
+        MatchSelector.MatchingStrategy.entries.forEach { strategy ->
             val result = matchSelector.selectMatchingItems(items, 150f, strategy)
             assertTrue("Strategy: $strategy", result.isEmpty())
         }
@@ -59,7 +59,7 @@ class MatchSelectorTest {
     @Test
     fun `test empty map with all strategies`() {
         val emptyMap = emptyMap<Float, AccountingRecord>()
-        MatchSelector.MatchingStrategy.values().forEach { strategy ->
+        MatchSelector.MatchingStrategy.entries.forEach { strategy ->
             val result = matchSelector.selectMatchingItems(emptyMap, 100f, strategy)
             assertTrue("Strategy: $strategy", result.isEmpty())
         }
@@ -68,7 +68,7 @@ class MatchSelectorTest {
     @Test
     fun `test all items match with all strategies`() {
         val items = createTestItems()
-        MatchSelector.MatchingStrategy.values().forEach { strategy ->
+        MatchSelector.MatchingStrategy.entries.forEach { strategy ->
             val result = matchSelector.selectMatchingItems(items, 700f, strategy)
             assertEquals("Strategy: $strategy", 3, result.size)
             assertEquals(
@@ -92,7 +92,7 @@ class MatchSelectorTest {
         }
         val targetTotal = 40f  // Sum of 8, 9, 10, 13 is exactly 40
 
-        MatchSelector.MatchingStrategy.values().forEach { strategy ->
+        MatchSelector.MatchingStrategy.entries.forEach { strategy ->
             val startTime = System.nanoTime()
             val result = matchSelector.selectMatchingItems(items, targetTotal, strategy)
             val endTime = System.nanoTime()
