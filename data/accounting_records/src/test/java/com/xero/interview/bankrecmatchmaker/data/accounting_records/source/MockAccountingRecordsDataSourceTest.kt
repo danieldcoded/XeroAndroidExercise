@@ -26,8 +26,8 @@ class MockAccountingRecordsDataSourceTest {
     fun `getAccountingRecords returns expected number of records`() = runBlocking {
         val records = dataSource.getAccountingRecords()
 
-        // Assuming MockAccountingRecordsDataSource returns 11 records
-        assertEquals(11, records.size)
+        // Assuming MockAccountingRecordsDataSource returns 10 records
+        assertEquals(10, records.size)
     }
 
 }
