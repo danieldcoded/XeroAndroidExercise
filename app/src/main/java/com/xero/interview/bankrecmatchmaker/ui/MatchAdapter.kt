@@ -1,4 +1,4 @@
-package com.xero.interview.bankrecmatchmaker
+package com.xero.interview.bankrecmatchmaker.ui
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.xero.interview.bankrecmatchmaker.CheckedListItem xmlns:android="http://schemas.android.com/apk/res/android"
+<com.xero.interview.bankrecmatchmaker.ui.CheckedListItem xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -59,4 +59,4 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</com.xero.interview.bankrecmatchmaker.CheckedListItem>
+</com.xero.interview.bankrecmatchmaker.ui.CheckedListItem>

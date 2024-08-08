@@ -2,13 +2,13 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.xero.interview.bankrecmatchmaker.FindMatchActivity">
+    tools:context="com.xero.interview.bankrecmatchmaker.ui.FindMatchActivity">
 
     <data>
 
         <variable
             name="viewModel"
-            type="com.xero.interview.bankrecmatchmaker.FindMatchViewModel" />
+            type="com.xero.interview.bankrecmatchmaker.ui.FindMatchViewModel" />
     </data>
 
     <LinearLayout

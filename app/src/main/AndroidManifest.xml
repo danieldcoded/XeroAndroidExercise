@@ -12,7 +12,7 @@
 
 
         <activity
-            android:name="com.xero.interview.bankrecmatchmaker.FindMatchActivity"
+            android:name="com.xero.interview.bankrecmatchmaker.ui.FindMatchActivity"
             android:exported="true"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>

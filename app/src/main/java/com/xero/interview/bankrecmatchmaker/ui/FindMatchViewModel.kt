@@ -1,22 +1,22 @@
-package com.xero.interview.bankrecmatchmaker
+package com.xero.interview.bankrecmatchmaker.ui
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.xero.interview.bankrecmatchmaker.core.common.CurrencyFormatter
 import com.xero.interview.bankrecmatchmaker.data.accounting_records.model.AccountingRecord
 import com.xero.interview.bankrecmatchmaker.data.accounting_records.repo.AccountingRecordsRepository
+import com.xero.interview.bankrecmatchmaker.domain.MatchSelector
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
 class FindMatchViewModel @Inject constructor(
     private val repository: AccountingRecordsRepository,
-    private val currencyFormatter: CurrencyFormatter
+    private val currencyFormatter: CurrencyFormatter,
+    private val matchSelector: MatchSelector
 ) : ViewModel() {
 
     private val _accountingRecords = MutableLiveData<List<AccountingRecord>>(emptyList())
@@ -33,6 +33,8 @@ class FindMatchViewModel @Inject constructor(
 
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> = _error
+
+    private var matchingStrategy = MatchSelector.MatchingStrategy.DYNAMIC_PROGRAMMING
 
     init {
         loadAccountingRecords()
@@ -118,6 +120,10 @@ class FindMatchViewModel @Inject constructor(
         return currentTotal - item.total >= 0
     }
 
+    fun setMatchingStrategy(strategy: MatchSelector.MatchingStrategy) {
+        matchingStrategy = strategy
+    }
+
     /**
      * Selects the matching items based on the current total.
      * First, it tries to find an exact match using a HashMap lookup.
@@ -129,93 +135,19 @@ class FindMatchViewModel @Inject constructor(
     fun selectMatchingItems() {
         val currentTotal = _remainingTotal.value ?: return
         val items = _accountingRecords.value ?: return
-        val totalToItemMap = items.associateBy { it.total }
 
         // Filter out all items that exceed the current total sum,
         // as they are not relevant when trying to select an item or subset of items.
         // This avoids unnecessary computation.
+        val totalToItemMap = items.associateBy { it.total }
         val filteredTotalToItemMap = totalToItemMap.filter { it.key <= currentTotal }
 
-        // First, try to find an exact match using the HashMap.
-        // Using HashMap lookup is more efficient than a linear search on the list.
-        // Time complexity for HashMap lookup: O(1) average case.
-        // Time complexity for List.find(): O(n) where n is the number of items.
-        val exactMatch = filteredTotalToItemMap[currentTotal]
-        if (exactMatch != null) {
-            selectItems(listOf(exactMatch))
-            return
-        }
-
-        // Second, try to find a subset of matches
-        val selectedItems = findSubsetOfMatchingItems(filteredTotalToItemMap, currentTotal)
+        val selectedItems = matchSelector.selectMatchingItems(filteredTotalToItemMap, currentTotal, matchingStrategy)
         if (selectedItems.isNotEmpty()) {
             selectItems(selectedItems)
         } else {
             _error.value = "No matching item or subset found"
         }
-    }
-
-    /**
-     * Finds a subset of items that sum up to the target total using dynamic programming.
-     *
-     * @param itemMap The map of total amounts to corresponding MatchItems.
-     * @param target The target total to match.
-     * @return A list of MatchItems that form a subset summing up to the target total, or an empty list if no subset is found.
-     */
-    private fun findSubsetOfMatchingItems(
-        itemMap: Map<Float, AccountingRecord>,
-        target: Float
-    ): List<AccountingRecord> {
-        /**
-         * Finding a subset of items that add up to a specific total is a well-known problem
-         * called the "Subset Sum Problem" which is a specific case of the "Knapsack Problem".
-         * This problem is generally NP-complete, meaning that there is no known efficient algorithm
-         * to solve it for all cases. However, there's a few approaches to consider depending
-         * on the size of the list and the total target:
-         *
-         * 1. Dynamic Programming (DP):
-         *    This method is for moderate-sized problems where the total isn't too large.
-         *    The basic idea is to use a boolean DP table to keep track of possible sums up to the target.
-         *    - Steps:
-         *      1. Create a DP table dp where dp[i] is True if a subset with sum i can be formed, otherwise False.
-         *      2. Initialize dp[0] as True (a sum of 0 can always be achieved with an empty subset).
-         *      3. For each item price, update the DP table in reverse (to avoid using the same item more than once in this iteration).
-         *      4. If dp[target] is True, then a subset with the desired sum exists.
-         *    - Complexity: O(n * T), where n is the number of items and T is the target total.
-         *
-         * 2. Backtracking:
-         *    This method tries all possible subsets and is suitable for smaller lists or when exact solutions are needed.
-         *    - Steps:
-         *      1. Recursively explore each item, either including it in the current subset or not.
-         *      2. Check if the current subset sums up to the target.
-         *      3. If it does, return the subset; otherwise, backtrack and try other combinations.
-         *    - Complexity: O(2^n), where n is the number of items. This is exponential, so it's only practical for small lists.
-         *
-         * 3. Meet-in-the-Middle:
-         *    This technique is useful for larger lists where a direct DP approach is infeasible.
-         *    It involves splitting the list into two halves, finding all subset sums for each half,
-         *    and then checking if there are combinations from the two halves that sum up to the target.
-         *    - Steps:
-         *      1. Divide the list into two halves.
-         *      2. Compute all possible subset sums for each half.
-         *      3. Use a hash set to check if there are any pairs of sums (one from each half) that add up to the target.
-         *    - Complexity: O(2^(n/2)) for generating subsets and checking pairs, which is more manageable than O(2^n).
-         *
-         * 4. Exact Cover Problem (Subset Sum via Integer Programming):
-         *    For some problems, this can be formulated it as an integer programming problem and use specialized solvers.
-         *    This approach can be very effective but requires knowledge of integer programming techniques and solvers.
-         *
-         * 5. Greedy Algorithms:
-         *    While not always suitable (especially for exact solutions), greedy algorithms might work for
-         *    specific cases or approximate solutions where items are sorted to try to reach the target.
-         *
-         * Summary:
-         * - Dynamic Programming is efficient for moderate-sized lists with a manageable target total.
-         * - Backtracking is useful for smaller lists.
-         * - Meet-in-the-Middle is suitable for larger lists.
-         * - Integer Programming can be effective for specific cases.
-         */
-        return emptyList()
     }
 
     /**
@@ -244,4 +176,5 @@ class FindMatchViewModel @Inject constructor(
     private fun updateFormattedTotal() {
         _formattedTotal.value = currencyFormatter.format(_remainingTotal.value ?: 0f)
     }
+
 }

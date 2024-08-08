@@ -3,6 +3,7 @@ package com.xero.interview.bankrecmatchmaker.di
 import com.xero.interview.bankrecmatchmaker.core.common.CurrencyFormatter
 import com.xero.interview.bankrecmatchmaker.data.accounting_records.repo.AccountingRecordsRepository
 import com.xero.interview.bankrecmatchmaker.data.accounting_records.source.MockAccountingRecordsDataSource
+import com.xero.interview.bankrecmatchmaker.domain.MatchSelector
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,4 +27,11 @@ object AppModule {
     fun provideCurrencyFormatter(): CurrencyFormatter {
         return CurrencyFormatter(Locale.getDefault(), Currency.getInstance(Locale.getDefault()))
     }
+
+    @Provides
+    @Singleton
+    fun provideMatchSelector(): MatchSelector {
+        return MatchSelector()
+    }
+
 }

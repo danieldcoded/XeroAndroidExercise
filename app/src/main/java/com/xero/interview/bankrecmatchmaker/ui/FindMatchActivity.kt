@@ -1,4 +1,4 @@
-package com.xero.interview.bankrecmatchmaker
+package com.xero.interview.bankrecmatchmaker.ui
 
 import android.os.Bundle
 import android.widget.Toast
@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.activity.viewModels
+import com.xero.interview.bankrecmatchmaker.R
 
 import com.xero.interview.bankrecmatchmaker.data.accounting_records.model.AccountingRecord
 import com.xero.interview.bankrecmatchmaker.databinding.ActivityFindMatchBinding
