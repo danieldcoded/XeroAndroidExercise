@@ -45,7 +45,6 @@ class MatchSelector {
             }
         }
 
-        println("${strategy.name} approach time: $time ms")
         return result
     }
 
